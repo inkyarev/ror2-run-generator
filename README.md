@@ -5,7 +5,7 @@ It is customizable through settings.json
 ## How to use
 - Download and install [.NET Runtime for .NET 9](https://dotnet.microsoft.com/en-us/download/dotnet/9.0).
 
-- Download the files from Releases.
+- Download the generator files from [Releases](https://github.com/inkyarev/ror2-run-generator/releases).
 
 - Run the executable.
 ## Plans for the future
