@@ -1,4 +1,4 @@
-﻿namespace RoR2RunGenerator;
+﻿namespace RoR2RunGenerator.Extensions;
 
 public static class ListExtensions
 {

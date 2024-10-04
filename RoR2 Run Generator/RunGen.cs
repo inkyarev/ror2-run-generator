@@ -1,12 +1,11 @@
-﻿using System.Collections.ObjectModel;
-using Newtonsoft.Json;
-using Weighted_Randomizer;
+﻿using Newtonsoft.Json;
+using RoR2RunGenerator.Extensions;
 
 namespace RoR2RunGenerator;
 
 public static class RunGen
 {
-    public static Settings Settings { get; set; } = new();
+    public static Settings Settings { get; private set; } = new();
     private static List<string> _lockedCharacters = [];
     private static List<string> _unlockedCharacters = [];
     private static readonly List<string> DefaultCharacters = 
@@ -63,7 +62,7 @@ public static class RunGen
         "Soul"
     ];
 
-    private static readonly List<List<string>> GeneratedArtifactRolls =
+    private static readonly List<List<string>> GeneratedArtifacts =
     [
         [
             "Sacrifice",
@@ -140,9 +139,9 @@ public static class RunGen
         ],
     ];
 
-    private static List<List<string>> _generatedUnlockedArtifactRolls = [];
+    private static List<List<string>> _unlockedGeneratedArtifacts = [];
 
-    private static readonly List<List<string>> MultiplayerGeneratedArtifactRolls =
+    private static readonly List<List<string>> MultiplayerGeneratedArtifacts =
     [
         [
             "Chaos",
@@ -168,11 +167,11 @@ public static class RunGen
         ],
     ];
     
-    private static List<List<string>> _generatedUnlockedMultiplayerArtifactRolls = [];
+    private static List<List<string>> _unlockedMultiplayerGeneratedArtifacts = [];
 
     public static string GetCharacter()
     {
-        return Characters.Random();
+        return _unlockedCharacters.Random();
     }
 
     public static string GetArtifactList()
@@ -191,12 +190,12 @@ public static class RunGen
                 return artifacts.TrimEnd(", ");
             
             case Settings.ArtifactSettings.RollGenerated:
-                if (_generatedUnlockedArtifactRolls.Count == 0) return "Not enough artifacts unlocked to use pregen lists";
-                return _generatedUnlockedArtifactRolls.Random()
+                if (_unlockedGeneratedArtifacts.Count == 0) return "Not enough artifacts unlocked to use pregen lists";
+                return _unlockedGeneratedArtifacts.Random()
                     .Aggregate(string.Empty, (current, artifact) => current + $"Artifact of {artifact}, ").TrimEnd(", ");
             
             case Settings.ArtifactSettings.RollMultiplayerGenerated:
-                var newList = _generatedUnlockedArtifactRolls.Concat(_generatedUnlockedMultiplayerArtifactRolls)
+                var newList = _unlockedGeneratedArtifacts.Concat(_unlockedMultiplayerGeneratedArtifacts)
                     .ToList();
                 if (newList.Count == 0) return "Not enough artifacts unlocked to use pregen lists";
                 return newList.Random()
@@ -281,23 +280,23 @@ public static class RunGen
     public static void UpdateSaveFileData()
     {
         if(!(File.Exists(Settings.SaveFilePath) && Settings.SaveFilePath.EndsWith(".xml"))) return;
-        var artifacts = File.ReadAllText(Settings.SaveFilePath)
+        var unlockedArtifacts = File.ReadAllText(Settings.SaveFilePath)
             .Split("</unlock>")
             .Where(unlock => unlock.Contains("Artifacts"))
             .Select(artifact => artifact.Split("Artifacts.")[1])
             .Select(RoR2InternalNameConverter.ConvertArtifactName)
             .ToList();
-        _unlockedArtifacts = artifacts;
-        _lockedArtifacts = Artifacts.Except(artifacts).ToList();
-        _generatedUnlockedArtifactRolls = GeneratedArtifactRolls.Where(list => !list.Any(_lockedArtifacts.Contains)).ToList();
-        _generatedUnlockedMultiplayerArtifactRolls = MultiplayerGeneratedArtifactRolls.Where(list => !list.Any(_lockedArtifacts.Contains)).ToList();
+        _unlockedArtifacts = unlockedArtifacts;
+        _lockedArtifacts = Artifacts.Except(unlockedArtifacts).ToList();
+        _unlockedGeneratedArtifacts = GeneratedArtifacts.Where(list => !list.Any(_lockedArtifacts.Contains)).ToList();
+        _unlockedMultiplayerGeneratedArtifacts = MultiplayerGeneratedArtifacts.Where(list => !list.Any(_lockedArtifacts.Contains)).ToList();
 
         var characters = File.ReadAllText(Settings.SaveFilePath)
             .Split("</unlock>")
             .Where(unlock => unlock.Contains("Characters"))
             .Select(artifact => artifact.Split("Characters.")[1])
             .Select(RoR2InternalNameConverter.ConvertCharacterName);
-        _unlockedCharacters = DefaultCharacters.Concat(characters).ToList();
+        _unlockedCharacters = DefaultCharacters.Concat(characters).Concat(Settings.CustomCharacters).ToList();
         _lockedCharacters = Characters.Except(_unlockedCharacters).ToList();
     }
 
