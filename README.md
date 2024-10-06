@@ -1,7 +1,7 @@
 # Risk of Rain 2 Run Generator
 This is a run generator for RoR2. It can generate you the character to play, a route to take, and artifacts to select. It reads from your savefile in order to generate relevant runs.
 
-It is customizable through settings.json
+It is customizable through settings.toml
 ## How to use
 - Download and install [.NET Runtime for .NET 9](https://dotnet.microsoft.com/en-us/download/dotnet/9.0).
 
