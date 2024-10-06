@@ -1,41 +1,91 @@
-﻿using Newtonsoft.Json;
+﻿using Tomlet.Attributes;
 
 namespace RoR2RunGenerator;
 
 
 public class Settings
 {
-    public const string Path = "settings.json";
-    [JsonProperty(Order = 0)]
+    [TomlNonSerialized]
+    public const string Path = "settings.toml";
+    [TomlPrecedingComment("""
+                          The path to the savefile. 
+                          Usually located at C:\Program Files(x86)\Steam\userdata\[some number]\632360\remote\UserProfiles.
+                          """)]
     public string SaveFilePath { get; set; } = string.Empty;
-    [JsonProperty(Order = 1)]
+    [TomlPrecedingComment("""
+                          List of custom characters.
+                          These characters will be added to your unlocked characters pool.
+                          """)]
+    // ReSharper disable once CollectionNeverUpdated.Global
     public List<string> CustomCharacters { get; set; } = [];
-    [JsonProperty(Order = 2)]
+    [TomlPrecedingComment("""
+        List of custom artifacts.
+        These artifacts will be added to your unlocked artifacts pool.
+        Provide the base name of the artifact; for example, to add "Artifact of Prestige", add "Prestige"
+        """)]
+    // ReSharper disable once CollectionNeverUpdated.Global
+    public List<string> CustomArtifacts { get; set; } = [];
+    [TomlPrecedingComment("""
+                          The probability to go to Void Fields.
+                          Should be between 0.0 and 1.0
+                          """)]
     public double VoidFieldsProbability { get; set; } = 0.45;
-    [JsonProperty(Order = 2)]
+    [TomlPrecedingComment("""
+                          The probability to go to Voidling right after Void Fields.
+                          Should be between 0.0 and 1.0
+                          """)]
     public double VoidlingPostVoidFieldsProbability { get; set; } = 0.2;
-    [JsonProperty(Order = 2)]
+    [TomlPrecedingComment("""
+                          The probability to go to False Son.
+                          Should be between 0.0 and 1.0
+                          """)]
     public double FalseSonProbability { get; set; } = 0.45;
-    [JsonProperty(Order = 2)]
+    [TomlPrecedingComment("""
+                          The probability to end the run by being Reborn.
+                          Should be between 0.0 and 1.0
+                          """)]
     public double RebirthProbability { get; set; } = 0.25;
-    [JsonProperty(Order = 2)]
+    [TomlPrecedingComment("""
+                          The probability to go to Mithrix.
+                          Should be between 0.0 and 1.0
+                          """)]
     public double MithrixProbability { get; set; } = 0.65;
-    [JsonProperty(Order = 2)]
+    [TomlPrecedingComment("""
+                          The probability to go to Voidling right after Mithrix (via Glass Frog).
+                          Should be between 0.0 and 1.0
+                          """)]
     public double VoidlingPostMithrixProbability { get; set; } = 0.15;
-    [JsonProperty(Order = 2)]
+    [TomlPrecedingComment("""
+                          The probability to go to Bulwarks Ambry.
+                          Should be between 0.0 and 1.0
+                          """)]
     public double BulwarksAmbryProbability { get; set; } = 0.55;
-    [JsonProperty(Order = 2)]
+    [TomlPrecedingComment("""
+                          The probability to end the run by crashing the game.
+                          Should be between 0.0 and 1.0
+                          """)]
     public double TrueEndingProbability { get; set; } = 0.05;
-    [JsonProperty(Order = 2)]
+    [TomlPrecedingComment("""
+                          The probability to end the run by obliterating. 
+                          If this and all the other probabilities fail to hit, you will be directed to The Moment, Whole.
+                          Should be between 0.0 and 1.0
+                          """)]
     public double ObliterateProbability { get; set; }
-    [JsonProperty(Order = 2)]
+    [TomlPrecedingComment("""
+                          How the artifacts should be rolled.
+                          Possible values:
+                            RollNone - don't roll artifacts;
+                            RollOne - roll one artifact per run;
+                            RollMultiple - roll multiple artifacts per run;
+                            RollGenerated - roll pregenerated(by me) artifact lists. Carefully crafted to provide most fun utilizing different artifact combos.
+                            RollMultiplayerGenerated - RollGenerated, but also include some combos with the Artifact of Death.
+                          """)]
     public ArtifactSettings ArtifactRollSettings { get; set; } = ArtifactSettings.RollOne;
-    [JsonProperty(Order = 3)]
-    public string ArtifactRollDescription = "1 - Roll one artifact. 2 - Roll multiple artifacts. 3 - Roll pregenerated(by me) artifact lists. 4 - 3, but include pregenerated multiplayer artifact lists";
 
     public enum ArtifactSettings
     {
-        RollOne = 1,
+        RollNone,
+        RollOne,
         RollMultiple,
         RollGenerated,
         RollMultiplayerGenerated

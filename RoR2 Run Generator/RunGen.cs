@@ -1,5 +1,5 @@
-﻿using Newtonsoft.Json;
-using RoR2RunGenerator.Extensions;
+﻿using RoR2RunGenerator.Extensions;
+using Tomlet;
 
 namespace RoR2RunGenerator;
 
@@ -8,15 +8,18 @@ public static class RunGen
     public static Settings Settings { get; private set; } = new();
     private static List<string> _lockedCharacters = [];
     private static List<string> _unlockedCharacters = [];
-    private static readonly List<string> DefaultCharacters = 
+    private static readonly List<string> DefaultCharacters =
+    #region DefaultCharacters
     [
         "Commando",
         "Huntress",
         "Railgunner",
         "Seeker"
     ];
+    #endregion
 
     private static readonly List<string> Characters =
+    #region Characters
     [
         "Commando",
         "Huntress",
@@ -35,11 +38,13 @@ public static class RunGen
         "False Son",
         "Chef"
     ];
+    #endregion
 
     private static List<string> _lockedArtifacts = [];
     private static List<string> _unlockedArtifacts = [];
 
     private static readonly List<string> Artifacts =
+    #region Artifacts
     [
         "Honor",
         "Rebirth",
@@ -61,8 +66,10 @@ public static class RunGen
         "Frailty",
         "Soul"
     ];
+    #endregion
 
     private static readonly List<List<string>> GeneratedArtifacts =
+    #region GeneratedArtifacts
     [
         [
             "Sacrifice",
@@ -138,10 +145,12 @@ public static class RunGen
             "Swarms"
         ],
     ];
+    #endregion
 
     private static List<List<string>> _unlockedGeneratedArtifacts = [];
 
     private static readonly List<List<string>> MultiplayerGeneratedArtifacts =
+    #region MultiplayerGeneratedArtifacts
     [
         [
             "Chaos",
@@ -166,6 +175,7 @@ public static class RunGen
             "Death"
         ],
     ];
+    #endregion
     
     private static List<List<string>> _unlockedMultiplayerGeneratedArtifacts = [];
 
@@ -200,6 +210,7 @@ public static class RunGen
                 if (newList.Count == 0) return "Not enough artifacts unlocked to use pregen lists";
                 return newList.Random()
                     .Aggregate(string.Empty, (current, artifact) => current + $"Artifact of {artifact}, ").TrimEnd(", ");
+            case Settings.ArtifactSettings.RollNone:
             default:
                 return string.Empty;
         }
@@ -271,10 +282,10 @@ public static class RunGen
     {
         if (!File.Exists(Settings.Path))
         {
-            File.WriteAllText(Settings.Path, JsonConvert.SerializeObject(new Settings(), Formatting.Indented));
+            ExportSettings(new Settings());
         }
-        var jsonString = File.ReadAllText(Settings.Path);
-        Settings = JsonConvert.DeserializeObject<Settings>(jsonString)!;
+        var tomlString = File.ReadAllText(Settings.Path);
+        Settings = TomletMain.To<Settings>(tomlString);
     }
 
     public static void UpdateSaveFileData()
@@ -286,8 +297,9 @@ public static class RunGen
             .Select(artifact => artifact.Split("Artifacts.")[1])
             .Select(RoR2InternalNameConverter.ConvertArtifactName)
             .ToList();
-        _unlockedArtifacts = unlockedArtifacts;
+        _unlockedArtifacts = unlockedArtifacts.Concat(Settings.CustomArtifacts).ToList();
         _lockedArtifacts = Artifacts.Except(unlockedArtifacts).ToList();
+        
         _unlockedGeneratedArtifacts = GeneratedArtifacts.Where(list => !list.Any(_lockedArtifacts.Contains)).ToList();
         _unlockedMultiplayerGeneratedArtifacts = MultiplayerGeneratedArtifacts.Where(list => !list.Any(_lockedArtifacts.Contains)).ToList();
 
@@ -300,8 +312,8 @@ public static class RunGen
         _lockedCharacters = Characters.Except(_unlockedCharacters).ToList();
     }
 
-    public static void ExportSettings()
+    public static void ExportSettings(Settings settings)
     {
-        File.WriteAllText(Settings.Path, JsonConvert.SerializeObject(Settings, Formatting.Indented));
+        File.WriteAllText(Settings.Path, TomletMain.TomlStringFrom(settings));
     }
 }

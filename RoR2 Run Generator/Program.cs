@@ -1,5 +1,5 @@
 ﻿using RoR2RunGenerator;
-
+using Tomlet;
 
 try
 {
@@ -19,7 +19,7 @@ try
         }
     }
 
-    RunGen.ExportSettings();
+    RunGen.ExportSettings(RunGen.Settings);
 
     while (true)
     {
